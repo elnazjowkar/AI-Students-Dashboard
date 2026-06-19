@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>AI Analysis Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+    <h2>Time Saved vs GPA</h2>
+    <canvas id="chart1"></canvas>
+
+    <h2>AI Tool vs GPA</h2>
+    <canvas id="chart2"></canvas>
+
+    <script>
+        fetch('http://localhost:3000/data')
+            .then(res => res.json())
+            .then(data => {
+
+                // =====================
+                // Time Saved vs GPA
+                // =====================
+                let low = 0, mid = 0, high = 0;
+                let c1 = 0, c2 = 0, c3 = 0;
+
+                data.forEach(d => {
+                    const time = parseFloat(d.Time_Saved_Hours_Weekly);
+                    const gpa = parseFloat(d.GPA_Post_AI);
+
+                    if (time <= 5) { low += gpa; c1++; }
+                    else if (time <= 10) { mid += gpa; c2++; }
+                    else { high += gpa; c3++; }
+                });
+
+                new Chart(document.getElementById('chart1'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['Low', 'Medium', 'High'],
+                        datasets: [{
+                            label: 'Avg GPA',
+                            data: [low / c1, mid / c2, high / c3]
+                        }]
+                    }
+                });
+
+                // =====================
+                // Tool vs GPA
+                // =====================
+                const toolGPA = {};
+
+                data.forEach(d => {
+                    const tool = d.Primary_AI_Tool;
+                    const gpa = parseFloat(d.GPA_Post_AI);
+
+                    if (!toolGPA[tool]) {
+                        toolGPA[tool] = { total: 0, count: 0 };
+                    }
+
+                    toolGPA[tool].total += gpa;
+                    toolGPA[tool].count++;
+                });
+
+                const labels = Object.keys(toolGPA);
+                const values = labels.map(t => toolGPA[t].total / toolGPA[t].count);
+
+                new Chart(document.getElementById('chart2'), {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Avg GPA',
+                            data: values
+                        }]
+                    }
+                });
+
+            });
+    </script>
+
+</body>
+
+</html>

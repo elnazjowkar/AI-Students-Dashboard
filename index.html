@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>AI Student Dashboard</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            font-family: Arial;
+            margin: 20px;
+        }
+
+        canvas {
+            max-width: 600px;
+            margin-bottom: 40px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>AI Student Dashboard</h1>
+
+    <h2>AI Tools Usage</h2>
+    <canvas id="chart1"></canvas>
+
+    <h2>Time Saved (Weekly)</h2>
+    <canvas id="chart2"></canvas>
+
+    <h2>GPA Before vs After AI</h2>
+    <canvas id="chart3"></canvas>
+
+    <script>
+        fetch('http://localhost:3000/data')
+            .then(res => res.json())
+            .then(data => {
+
+                // =========================
+                // 1. AI Tools Usage
+                // =========================
+                const tools = {};
+
+                data.forEach(d => {
+                    const tool = d.Primary_AI_Tool;
+                    tools[tool] = (tools[tool] || 0) + 1;
+                });
+
+                const labels = Object.keys(tools);
+                const values = Object.values(tools);
+
+                new Chart(document.getElementById('chart1'), {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'AI Tools Usage',
+                            data: values
+                        }]
+                    }
+                });
+
+                // =========================
+                // 2. Time Saved (Weekly)
+                // =========================
+                const timeSaved = data.map(d => parseFloat(d.Time_Saved_Hours_Weekly));
+
+                let low = 0;
+                let medium = 0;
+                let high = 0;
+
+                timeSaved.forEach(t => {
+                    if (t <= 5) low++;
+                    else if (t <= 10) medium++;
+                    else high++;
+                });
+
+                const labels2 = ['0-5 hrs', '5-10 hrs', '10+ hrs'];
+                const values2 = [low, medium, high];
+
+                new Chart(document.getElementById('chart2'), {
+                    type: 'bar',
+                    data: {
+                        labels: labels2,
+                        datasets: [{
+                            label: 'Time Saved (Weekly)',
+                            data: values2
+                        }]
+                    }
+                });
+
+                // =========================
+                // 3. GPA Before vs After AI
+                // =========================
+                let totalBefore = 0;
+                let totalAfter = 0;
+
+                data.forEach(d => {
+                    totalBefore += parseFloat(d.GPA_Baseline);
+                    totalAfter += parseFloat(d.GPA_Post_AI);
+                });
+
+                const avgBefore = totalBefore / data.length;
+                const avgAfter = totalAfter / data.length;
+
+                new Chart(document.getElementById('chart3'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['Before AI', 'After AI'],
+                        datasets: [{
+                            label: 'Average GPA',
+                            data: [avgBefore, avgAfter]
+                        }]
+                    }
+                });
+
+            })
+            .catch(err => console.error(err));
+    </script>
+
+</body>
+
+</html>

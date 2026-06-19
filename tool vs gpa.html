@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>AI Tool vs GPA</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+    <h2>AI Tool vs GPA</h2>
+    <canvas id="chart"></canvas>
+
+    <script>
+        fetch('http://localhost:3000/data')
+            .then(res => res.json())
+            .then(data => {
+
+                const toolGPA = {};
+
+                data.forEach(d => {
+                    const tool = d.Primary_AI_Tool;
+                    const gpa = parseFloat(d.GPA_Post_AI);
+
+                    if (!toolGPA[tool]) {
+                        toolGPA[tool] = { total: 0, count: 0 };
+                    }
+
+                    toolGPA[tool].total += gpa;
+                    toolGPA[tool].count += 1;
+                });
+
+                const labels = Object.keys(toolGPA);
+                const values = labels.map(tool => {
+                    return toolGPA[tool].total / toolGPA[tool].count;
+                });
+
+                new Chart(document.getElementById('chart'), {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Average GPA',
+                            data: values
+                        }]
+                    }
+                });
+
+            });
+    </script>
+
+</body>
+
+</html>

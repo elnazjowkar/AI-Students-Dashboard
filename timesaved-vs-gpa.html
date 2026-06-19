@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Time Saved vs GPA</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+    <h2>Time Saved vs GPA</h2>
+    <canvas id="chart"></canvas>
+
+    <script>
+        fetch('http://localhost:3000/data')
+            .then(res => res.json())
+            .then(data => {
+
+                let lowGPA = 0;
+                let mediumGPA = 0;
+                let highGPA = 0;
+
+                let lowCount = 0;
+                let mediumCount = 0;
+                let highCount = 0;
+
+                data.forEach(d => {
+                    const time = parseFloat(d.Time_Saved_Hours_Weekly);
+                    const gpa = parseFloat(d.GPA_Post_AI);
+
+                    if (time <= 5) {
+                        lowGPA += gpa;
+                        lowCount++;
+                    } else if (time <= 10) {
+                        mediumGPA += gpa;
+                        mediumCount++;
+                    } else {
+                        highGPA += gpa;
+                        highCount++;
+                    }
+                });
+
+                const avgLow = lowGPA / lowCount;
+                const avgMedium = mediumGPA / mediumCount;
+                const avgHigh = highGPA / highCount;
+
+                new Chart(document.getElementById('chart'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['Low Time', 'Medium Time', 'High Time'],
+                        datasets: [{
+                            label: 'Average GPA',
+                            data: [avgLow, avgMedium, avgHigh]
+                        }]
+                    }
+                });
+
+            });
+    </script>
+
+</body>
+
+</html>
