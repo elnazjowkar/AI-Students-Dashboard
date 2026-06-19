@@ -117,6 +117,8 @@ AI-Student-Dashboard/
 ```
 
 ---
+## Power BI Dashboard
+![Dashboard](dashboard.jpg)
 
 ## Author
 
